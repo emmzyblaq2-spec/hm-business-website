@@ -13,5 +13,37 @@
 <section id="quote" class="quote"><h2>Request a Quote</h2><p class="muted">Fill this form and HM will contact you. For immediate enquiries, use WhatsApp.</p><form class="form" onsubmit="sendQuote(event)"><input name="name" placeholder="Your name" required><input name="phone" placeholder="Phone / WhatsApp" required><input name="email" type="email" placeholder="Email"><select name="service" required><option value="">Choose service</option><option>Building & Construction</option><option>Furniture</option><option>Imported Cars</option><option>Imported Goods</option><option>Property / Contract Project</option><option>Custom Project</option></select><input name="location" placeholder="Project / delivery location"><input name="budget" placeholder="Estimated budget"><textarea name="description" placeholder="Tell HM what you need" required></textarea><button class="btn full" type="submit">Send Request via WhatsApp</button></form><p id="msg" class="notice" style="display:none"></p></section>
 <section><h2>Contact HM</h2><div class="contact"><a href="tel:08039929548">Call 08039929548</a><a href="tel:08036196720">Call 08036196720</a><a href="mailto:ademichaelus@gmail.com">Email HM</a><a href="https://wa.me/2348036196720">WhatsApp</a></div></section>
 </main><footer><b>HM</b><span>54, Shasha Road, Akowonjo, Lagos</span><span>08039929548 • 08036196720</span><span>ademichaelus@gmail.com</span></footer>
-<script>function sendQuote(e){e.preventDefault();const f=new FormData(e.target);let t='HM Quote Request%0A%0AName: '+encodeURIComponent(f.get('name'))+'%0APhone: '+encodeURIComponent(f.get('phone'))+'%0AEmail: '+encodeURIComponent(f.get('email')||'')+'%0AService: '+encodeURIComponent(f.get('service'))+'%0ALocation: '+encodeURIComponent(f.get('location')||'')+'%0ABudget: '+encodeURIComponent(f.get('budget')||'')+'%0ADescription: '+encodeURIComponent(f.get('description'));window.open('https://wa.me/2348036196720?text='+t,'_blank');document.getElementById('msg').style.display='block';document.getElementById('msg').textContent='Your WhatsApp message is ready. Tap Send in WhatsApp to send it to HM.'}</script>
+<script>
+const SUPABASE_URL='https://pchvpdwcmsgyhrzvvfob.supabase.co';
+const SUPABASE_KEY='sb_publishable_vA1ZWi_Qf7MqPBJPGol5cQ_VD0oBtR0';
+async function sendQuote(e){
+  e.preventDefault();
+  const form=e.target, f=new FormData(form), msg=document.getElementById('msg');
+  const payload={
+    customer_name:String(f.get('name')||'').trim(),
+    phone:String(f.get('phone')||'').trim(),
+    email:String(f.get('email')||'').trim()||null,
+    service:String(f.get('service')||'').trim(),
+    location:String(f.get('location')||'').trim()||null,
+    budget:String(f.get('budget')||'').trim()||null,
+    description:String(f.get('description')||'').trim()
+  };
+  msg.style.display='block'; msg.textContent='Sending your request...';
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/quote_requests',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok){throw new Error('Quote request could not be saved ('+res.status+')');}
+    const t='HM Quote Request\n\nName: '+payload.customer_name+'\nPhone: '+payload.phone+'\nEmail: '+(payload.email||'')+'\nService: '+payload.service+'\nLocation: '+(payload.location||'')+'\nBudget: '+(payload.budget||'')+'\nDescription: '+payload.description;
+    window.open('https://wa.me/2348036196720?text='+encodeURIComponent(t),'_blank');
+    msg.textContent='Request saved successfully. WhatsApp is also ready for immediate contact with HM.';
+    form.reset();
+  }catch(err){
+    console.error(err);
+    msg.textContent='We could not save the request right now. Please contact HM on WhatsApp or call 08039929548.';
+  }
+}
+</script>
 </body></html>

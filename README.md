@@ -1,1 +1,1 @@
-HM single-file business website. Upload index.html to the root of the GitHub repository.
+HM single-file website with Supabase quote-request storage.
